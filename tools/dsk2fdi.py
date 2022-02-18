@@ -55,7 +55,6 @@ def createFDI(Sides,Tracks,Sectors,SecSize,diskBytesArray,compress=None):
     fdiDiskArray[3]  = 1
     #Set compression byte (not part of the FDI specification)
     if compress == 'lzma':
-        print("Compressed",compress)
         fdiDiskArray[3]  +=2
     fdiDiskArray[4]  = Tracks&0xFF
     fdiDiskArray[5]  = Tracks>>8
@@ -92,8 +91,10 @@ def createFDI(Sides,Tracks,Sectors,SecSize,diskBytesArray,compress=None):
         sectorId = 0
         sectorAddress = 0
         offset+=7
+        trackData = compress_lzma(diskBytesArray[diskDataReadOffset:diskDataReadOffset+SecSize*Sectors],compress)
+        # write track data at correct address
+        fdiDiskArray[fdiDataWriteOffset:fdiDataWriteOffset+len(trackData)] = trackData
         while sectorId<Sectors:
-            sectorData = compress_lzma(diskBytesArray[diskDataReadOffset:diskDataReadOffset+SecSize],compress)
             # Create sector entry
             fdiDiskArray[offset+0] = int(track/Sides)
             fdiDiskArray[offset+1] = track%Sides
@@ -104,16 +105,13 @@ def createFDI(Sides,Tracks,Sectors,SecSize,diskBytesArray,compress=None):
             fdiDiskArray[offset+5] = sectorAddress&0xFF
             fdiDiskArray[offset+6] = sectorAddress>>8
 
-            # write sector data at correct address
-            fdiDiskArray[fdiDataWriteOffset:fdiDataWriteOffset+len(sectorData)] = sectorData
-
             sectorId+=1
             offset+=7
-            sectorAddress+=len(sectorData)
+            sectorAddress+=SecSize
             diskDataReadOffset+=SecSize
-            fdiDataWriteOffset+=len(sectorData)
-            trackAddress+=len(sectorData)
 
+        fdiDataWriteOffset+=len(trackData)
+        trackAddress+=len(trackData)
         track+=1
 
     return fdiDiskArray[0:fdiDataWriteOffset]
@@ -179,7 +177,7 @@ print("Opening "+sys.argv[1])
 dskFile = open(sys.argv[1], 'rb')
 fdiArray = analyzeMsxDsk(dskFile,sys.argv[1],compress)
 if len(fdiArray) > 0 :
-    outFile = sys.argv[1].replace(".dsk",".dsk.fdi")
+    outFile = sys.argv[1]+".fdi"
     print("File is MSX dsk file, saving "+outFile)
     newfile=open(outFile,'wb')
     newfile.write(fdiArray)
@@ -190,7 +188,7 @@ if len(fdiArray) > 0 :
 else :
     fdiArray = analyzeRawDsk(dskFile,sys.argv[1])
     if len(fdiArray) > 0 :
-        outFile = sys.argv[1].replace(".dsk",".dsk.fdi")
+        outFile = sys.argv[1]+".fdi"
         print("File is RAW dsk file, saving "+outFile)
         newfile=open(outFile,'wb')
         newfile.write(fdiArray)
