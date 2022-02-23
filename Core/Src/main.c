@@ -310,10 +310,10 @@ void GW_EnterDeepSleep(void)
 
   // Delay 500ms to give us a chance to attach a debugger in case
   // we end up in a suspend-loop.
-  for (int i = 0; i < 10; i++) {
-      wdog_refresh();
-      HAL_Delay(50);
-  }
+  // for (int i = 0; i < 10; i++) {
+  //     wdog_refresh();
+  //     HAL_Delay(50);
+  // }
 
   HAL_PWR_EnterSTANDBYMode();
 

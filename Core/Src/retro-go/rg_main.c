@@ -711,7 +711,7 @@ void app_check_data_loop()
             wdog_refresh();
             HAL_Delay(10);
         }
-        app_sleep_logo();
+        // app_sleep_logo();
         GW_EnterDeepSleep();
         //odroid_system_sleep();
     }

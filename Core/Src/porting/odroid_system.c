@@ -138,7 +138,7 @@ void odroid_system_sleep(void)
 
     // odroid_settings_commit();
     gui_save_current_tab();
-    app_sleep_logo();
+    // app_sleep_logo();
 
     GW_EnterDeepSleep();
 }
