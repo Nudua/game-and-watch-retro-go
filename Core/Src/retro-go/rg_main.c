@@ -799,7 +799,7 @@ void app_main(void)
     app_check_data_loop();
     emulators_init();
 
-    app_start_logo();
+    // app_start_logo();
 
     // favorites_init();
 
